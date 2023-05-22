@@ -54,7 +54,8 @@ public class UnGraph extends Graph {
 	@Override
 	public boolean isConnected() {
 		result = new int[numVers];
-		resetGraph();
+		visited = new boolean[numVers];
+
 		DFS(0);
 		for (int i = 0; i < visited.length; i++) {
 			if (visited[i] == false)
@@ -239,17 +240,7 @@ public class UnGraph extends Graph {
 		}
 		return true;
 	}
-
-	// 2. check ko co lap, treo
-	private int demBac1() {
-		int count = 0;
-		for (int i = 0; i < numVers; i++) {
-			if (deg(i) == 1)
-				count++;
-		}
-		return count;
-	}
-
+	//
 	private int demBacHon1() {
 		int count = 0;
 		for (int i = 0; i < numVers; i++) {
@@ -294,34 +285,20 @@ public class UnGraph extends Graph {
 	@Override
 	public boolean isHamiltonGraph() {
 		if (checkVoHuong()) {
-			boolean re = false;
 			if (isConnected() == false)
 				return false;
 			else {
-				if (demBac1() != 0)
-					return false;
-
 				if (checkKn() == true)
-					re = true;
-				else
-					re = false;
-				if (checkBipartiteGraphForHamilton() == true)
-					re = true;
-				else
-					re = false;
-				if (demBacHon1() == numVers)
-					re = true;
-				else
-					re = false;
-				if (dirac() == true)
-					re = true;
-				else
-					re = false;
-				if (ore() == true)
 					return true;
-				else
-					re = false;
-				return re;
+				else if (checkBipartiteGraphForHamilton() == true)
+					return true;
+				else if (demBacHon1() == numVers)
+					return true;
+				else if (dirac() == true)
+					return true;
+				else if (ore() == true)
+					return true;
+				return false;
 			}
 		} else {
 			// không khả thi với sô lượng lớn mà số lượng lớn dùng thuật toán nào cũng phức tạp
@@ -335,8 +312,6 @@ public class UnGraph extends Graph {
 	}
 
 	Integer[] cycleVer = new Integer[numVers + 1];
-
-	// re: chua cac chu trinh hamilton cua 1 ver
 	@Override
 	public Map<List<Integer>, Integer> findShortestCycle(int startVertex) {
 		if (checkVoHuong() && isHamiltonGraph() == false) {
@@ -348,6 +323,7 @@ public class UnGraph extends Graph {
 			allCycles = new LinkedHashMap<>();
 			shortestPathsOrCycles = new LinkedHashMap<>();
 			cycleVer = new Integer[numVers + 1];
+			lastShortestCycle = null;
 			Arrays.fill(visited, false);
 			// thuat toan quay lui
 			cycleVer[0] = startVertex;
@@ -365,7 +341,6 @@ public class UnGraph extends Graph {
 		}
 		return shortestPathsOrCycles;
 	}
-
 	private void expand(int i) {
 		for (int j = 0; j < numVers; j++) {
 			if (matrixAdj[cycleVer[i - 1]][j] != 0 && visited[j] == false) {
